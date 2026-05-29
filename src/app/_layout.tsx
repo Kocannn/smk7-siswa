@@ -1,15 +1,88 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import '../global.css';
+
+import { createContext, useContext, useState } from 'react';
 import { useColorScheme } from 'react-native';
+import { Stack, DarkTheme, DefaultTheme, ThemeProvider as NavThemeProvider } from 'expo-router';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { StatusBar } from 'expo-status-bar';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { AuthProvider } from '@/hooks/use-auth';
+import { queryClient } from '@/lib/query-client';
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+// Theme context - inline to avoid module resolution issues
+type ThemeMode = 'light' | 'dark' | 'system';
+
+interface ThemeContextType {
+  mode: ThemeMode;
+  isDark: boolean;
+  setMode: (mode: ThemeMode) => void;
+}
+
+const ThemeContext = createContext<ThemeContextType>({
+  mode: 'system',
+  isDark: false,
+  setMode: () => {},
+});
+
+export function useThemeMode() {
+  return useContext(ThemeContext);
+}
+
+function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const systemScheme = useColorScheme();
+  const [mode, setMode] = useState<ThemeMode>('system');
+
+  const isDark = mode === 'system'
+    ? systemScheme === 'dark'
+    : mode === 'dark';
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <ThemeContext.Provider value={{ mode, isDark, setMode }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+// Root nav component
+function RootLayoutNav() {
+  const { isDark } = useThemeMode();
+
+  return (
+    <NavThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(app)" />
+        <Stack.Screen
+          name="exams/[id]"
+          options={{ headerShown: true, title: 'Detail Ujian', presentation: 'modal' }}
+        />
+        <Stack.Screen
+          name="exams/attempt"
+          options={{ headerShown: false, presentation: 'fullScreenModal' }}
+        />
+        <Stack.Screen
+          name="excuses/create"
+          options={{ headerShown: true, title: 'Ajukan Izin', presentation: 'modal' }}
+        />
+        <Stack.Screen
+          name="excuses/[id]"
+          options={{ headerShown: true, title: 'Detail Izin' }}
+        />
+      </Stack>
+    </NavThemeProvider>
+  );
+}
+
+// Root layout
+export default function RootLayout() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AuthProvider>
+          <RootLayoutNav />
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
