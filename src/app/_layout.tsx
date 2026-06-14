@@ -21,7 +21,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType>({
   mode: 'system',
   isDark: false,
-  setMode: () => {},
+  setMode: () => { },
 });
 
 export function useThemeMode() {
@@ -60,14 +60,6 @@ function RootLayoutNav() {
         <Stack.Screen
           name="exams/attempt"
           options={{ headerShown: false, presentation: 'fullScreenModal' }}
-        />
-        <Stack.Screen
-          name="excuses/create"
-          options={{ headerShown: true, title: 'Ajukan Izin', presentation: 'modal' }}
-        />
-        <Stack.Screen
-          name="excuses/[id]"
-          options={{ headerShown: true, title: 'Detail Izin' }}
         />
       </Stack>
     </NavThemeProvider>
