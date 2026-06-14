@@ -108,19 +108,17 @@ export default function ProfileScreen() {
               <Pressable
                 key={option.value}
                 onPress={() => setThemeMode(option.value)}
-                className={`flex-1 items-center py-3 rounded-xl border-2 ${
-                  themeMode === option.value
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
-                }`}
+                className={`flex-1 items-center py-3 rounded-xl border-2 ${themeMode === option.value
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
+                  }`}
               >
                 <Text className="text-xl mb-1">{option.icon}</Text>
                 <Text
-                  className={`text-xs font-medium ${
-                    themeMode === option.value
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-600 dark:text-gray-400'
-                  }`}
+                  className={`text-xs font-medium ${themeMode === option.value
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-gray-600 dark:text-gray-400'
+                    }`}
                 >
                   {option.label}
                 </Text>
@@ -128,32 +126,6 @@ export default function ProfileScreen() {
             ))}
           </View>
         </Card>
-
-        {/* Menu Items */}
-        <Text className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 mt-4 px-1">
-          Menu
-        </Text>
-
-        <Pressable onPress={() => router.push('/excuses/create')}>
-          <Card variant="elevated" className="mb-2.5">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center">
-                <View className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 items-center justify-center mr-3">
-                  <Text className="text-lg">📋</Text>
-                </View>
-                <View>
-                  <Text className="text-sm font-medium text-gray-900 dark:text-white">
-                    Izin / Sakit
-                  </Text>
-                  <Text className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Ajukan izin atau sakit
-                  </Text>
-                </View>
-              </View>
-              <Text className="text-gray-400 dark:text-gray-500 text-lg">›</Text>
-            </View>
-          </Card>
-        </Pressable>
 
         {/* Logout */}
         <View className="mt-6 mb-8">
