@@ -54,13 +54,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="exams"
-        options={{
-          title: 'Ujian',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 22 }}>📝</Text>,
-        }}
-      />
-      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profil',

@@ -53,14 +53,6 @@ function RootLayoutNav() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(app)" />
-        <Stack.Screen
-          name="exams/[id]"
-          options={{ headerShown: true, title: 'Detail Ujian', presentation: 'modal' }}
-        />
-        <Stack.Screen
-          name="exams/attempt"
-          options={{ headerShown: false, presentation: 'fullScreenModal' }}
-        />
       </Stack>
     </NavThemeProvider>
   );
