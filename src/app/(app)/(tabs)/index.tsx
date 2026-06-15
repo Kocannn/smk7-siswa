@@ -82,7 +82,11 @@ export default function DashboardScreen() {
           <View className="flex-row justify-between items-center">
             <View className="flex-1 mr-3">
               <Text className="font-medium text-gray-900 dark:text-white text-sm">
-                {item.subject || item.session_type}
+                {item.session_type === 'absen pagi'
+                  ? 'Absen Pagi'
+                  : item.session_type === 'absen pulang'
+                    ? 'Absen Pulang'
+                    : item.subject || item.session_type}
               </Text>
               <Text className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                 {item.scanned_at
