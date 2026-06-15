@@ -78,7 +78,11 @@ export default function AttendanceScreen() {
             <View className="flex-row justify-between items-center">
               <View className="flex-1 mr-3">
                 <Text className="font-medium text-gray-900 dark:text-white text-sm">
-                  {item.session.subject || item.session.type}
+                  {item.session.type === 'absen pagi'
+                    ? 'Absen Pagi'
+                    : item.session.type === 'absen pulang'
+                      ? 'Absen Pulang'
+                      : item.session.subject || item.session.type}
                 </Text>
                 <Text className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                   {item.scanned_at
