@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import * as examsApi from '@/api/exams';
-import type { StartExamPayload, SaveResponsePayload } from '@/types/exam';
+import type { SaveResponsePayload } from '@/types/exam';
 
 export function useExams() {
   return useQuery({
@@ -14,8 +14,8 @@ export function useStartExam() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ examId, payload }: { examId: number; payload?: StartExamPayload }) =>
-      examsApi.startExam(examId, payload),
+    mutationFn: ({ examId, accessCode }: { examId: number; accessCode?: string }) =>
+      examsApi.startExam(examId, accessCode ? { access_code: accessCode } : undefined),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exams'] });
     },

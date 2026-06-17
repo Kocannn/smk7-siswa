@@ -3,72 +3,11 @@ import { View, Text, FlatList, RefreshControl, TextInput, Modal, Pressable, Aler
 import { router } from 'expo-router';
 
 import { useExams, useStartExam } from '@/hooks/use-exams';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { ExamCard } from '@/components/exams/exam-card';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { EmptyState } from '@/components/ui/empty-state';
 import type { ExamListItem } from '@/types/exam';
-
-const statusConfig: Record<string, { label: string; variant: 'success' | 'warning' | 'default' }> = {
-  active: { label: 'Aktif', variant: 'success' },
-  draft: { label: 'Draft', variant: 'warning' },
-  completed: { label: 'Selesai', variant: 'default' },
-};
-
-function ExamCard({ exam, onPress }: { exam: ExamListItem; onPress: () => void }) {
-  const status = statusConfig[exam.status] ?? { label: exam.status, variant: 'default' as const };
-  const attemptStatus = exam.attempt?.status;
-
-  return (
-    <Card>
-      <Pressable onPress={onPress} className="p-4">
-        <View className="flex-row items-start justify-between mb-2">
-          <View className="flex-1 mr-3">
-            <Text className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              📝 {exam.title}
-            </Text>
-            <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {exam.subject_name}
-            </Text>
-          </View>
-          <Badge variant={status.variant}>{status.label}</Badge>
-        </View>
-
-        <View className="flex-row items-center gap-4 mb-3">
-          <Text className="text-sm text-gray-500 dark:text-gray-400">
-            ⏱️ {exam.duration_minutes} menit
-          </Text>
-          <Text className="text-sm text-gray-500 dark:text-gray-400">
-            📋 {exam.questions_count} soal
-          </Text>
-        </View>
-
-        {attemptStatus === 'submitted' || attemptStatus === 'graded' ? (
-          <View className="flex-row items-center justify-between">
-            <Badge variant="warning">
-              {attemptStatus === 'graded' ? `Nilai: ${exam.attempt?.score ?? '-'}` : 'Sudah Dikumpulkan'}
-            </Badge>
-            <Text className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-              Lihat Hasil →
-            </Text>
-          </View>
-        ) : attemptStatus === 'in_progress' ? (
-          <View className="flex-row items-center justify-between">
-            <Badge variant="warning">Sedang Dikerjakan</Badge>
-            <Text className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-              Lanjutkan →
-            </Text>
-          </View>
-        ) : (
-          <Button onPress={onPress} size="sm" className="self-start">
-            Mulai Ujian
-          </Button>
-        )}
-      </Pressable>
-    </Card>
-  );
-}
 
 export default function ExamsScreen() {
   const { data: exams, isLoading, refetch, isRefetching, error } = useExams();
@@ -89,16 +28,13 @@ export default function ExamsScreen() {
       } else {
         router.push({
           pathname: '/(app)/exams/[id]',
-          params: { id: String(exam.id) },
+          params: { id: String(exam.id), attemptId: String(exam.attempt.id) },
         });
       }
       return;
     }
 
     // Start new attempt
-    // If exam needs access code, show modal
-    // Note: We don't know from the list API if access_code is required,
-    // so we try to start and handle the error if code is needed
     setSelectedExam(exam);
     setAccessCode('');
     startExam.mutate(
@@ -108,11 +44,10 @@ export default function ExamsScreen() {
           setShowAccessCode(false);
           router.push({
             pathname: '/(app)/exams/[id]',
-            params: { id: String(exam.id) },
+            params: { id: String(exam.id), attemptId: String(attempt.id) },
           });
         },
         onError: (err: any) => {
-          // If error mentions access code, show modal
           const msg = err?.response?.data?.message || err?.message || '';
           if (msg.toLowerCase().includes('kode') || msg.toLowerCase().includes('access')) {
             setShowAccessCode(true);
@@ -129,11 +64,11 @@ export default function ExamsScreen() {
     startExam.mutate(
       { examId: selectedExam.id, accessCode: accessCode.trim() },
       {
-        onSuccess: () => {
+        onSuccess: (attempt) => {
           setShowAccessCode(false);
           router.push({
             pathname: '/(app)/exams/[id]',
-            params: { id: String(selectedExam.id) },
+            params: { id: String(selectedExam.id), attemptId: String(attempt.id) },
           });
         },
         onError: (err: any) => {
@@ -149,7 +84,7 @@ export default function ExamsScreen() {
     return (
       <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">
         <Text className="text-red-500 text-center mb-4">Gagal memuat data ujian</Text>
-        <Button onPress={() => refetch()} variant="outline">Coba Lagi</Button>
+        <Button title="Coba Lagi" onPress={() => refetch()} variant="secondary" />
       </View>
     );
   }
@@ -173,7 +108,7 @@ export default function ExamsScreen() {
         data={exams}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <View className="px-4 mb-3">
+          <View className="px-4">
             <ExamCard exam={item} onPress={() => handleExamPress(item)} />
           </View>
         )}
@@ -214,19 +149,17 @@ export default function ExamsScreen() {
               />
               <View className="flex-row gap-3">
                 <Button
+                  title="Batal"
                   onPress={() => setShowAccessCode(false)}
-                  variant="outline"
+                  variant="secondary"
                   className="flex-1"
-                >
-                  Batal
-                </Button>
+                />
                 <Button
+                  title={startExam.isPending ? 'Memulai...' : 'Mulai'}
                   onPress={handleStartWithCode}
                   disabled={!accessCode.trim() || startExam.isPending}
                   className="flex-1"
-                >
-                  {startExam.isPending ? 'Memulai...' : 'Mulai'}
-                </Button>
+                />
               </View>
             </View>
           </Pressable>
